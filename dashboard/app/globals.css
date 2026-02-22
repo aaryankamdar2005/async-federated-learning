@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gray-50: #f9fafb;
+  --color-gray-200: #e5e7eb;
+  --color-gray-400: #9ca3af;
+  --color-gray-950: #030712;
+}
+
+body {
+  background-color: #030712; /* Tailwind gray-950 */
+  color: #f9fafb; /* Tailwind gray-50 */
+}
+
+@layer components {
+  .bg-background { @apply bg-[#030712]; }
+  .text-foreground { @apply text-gray-50; }
+  .text-muted-foreground { @apply text-gray-400; }
+  .bg-border { @apply bg-white/5; }
+  .border-border { @apply border-white/10; }
+  .glass-button { @apply bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all; }
+  .primary-button { @apply bg-white text-black hover:bg-gray-200 transition-all; }
+  .glass-card { @apply bg-white/5 border border-white/10 backdrop-blur-lg; }
+  .project-image { @apply bg-black/50 overflow-hidden relative; }
+  .skill-badge { @apply bg-white/10 border border-white/10; }
+  .divider { @apply w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent; }
+  .gradient-text { @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-indigo-500; }
+  .geist-font { font-family: sans-serif; }
+  .inter-font { font-family: sans-serif; }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}

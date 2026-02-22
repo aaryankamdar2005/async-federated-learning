@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+torch
+torchvision
+opacus          # Facebook's Differential Privacy library
+numpy
+pydantic
+scikit-learn
