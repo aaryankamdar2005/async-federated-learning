@@ -1,8 +1,8 @@
-// app/page.tsx
-"use client";
+﻿"use client";
 import { useRouter } from "next/navigation";
 import { PortfolioPage, PortfolioPageProps } from "@/components/ui/starfall-portfolio-landing";
-import { Shield, Server, Users, Database, Activity, Lock } from "lucide-react";
+import { Shield, Server, Lock, Activity } from "lucide-react";
+import BackgroundAtoms from "@/components/BackgroundAtoms";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -27,34 +27,24 @@ export default function LandingPage() {
       titleLine2Gradient: 'Federated Learning',
       subtitle: 'A zero-trust platform for collaborative AI model training. Contribute to global models securely without sharing your raw data.',
     },
-    ctaButtons: {
-      primary: {
-        label: '👨‍💻 Login as Server',
-        onClick: () => router.push('/server'),
-      },
-      secondary: {
-        label: '🛡️ Login as Client',
-        onClick: () => router.push('/client'),
-      },
-    },
     projects: [
       { 
         title: 'Zero-Trust Aggregation', 
         description: 'Server evaluates every update for accuracy improvements and rejects poisoned or fraudulent weights.',
         tags: ['Security', 'Evaluation'],
-        imageContent: <Server className="w-12 h-12 text-rose-400" />
+        imageContent: <Server className="w-12 h-12 text-[#ffffff]" />
       },
       { 
         title: 'Differential Privacy', 
         description: 'Client nodes train locally and apply differential privacy (Opacus) before submitting updates.',
         tags: ['Privacy', 'Opacus'],
-        imageContent: <Lock className="w-12 h-12 text-indigo-400" />
+        imageContent: <Lock className="w-12 h-12 text-[#ffffff]" />
       },
       { 
         title: 'Consensus & Bounties', 
         description: 'Contributors earn token bounties based on the actual accuracy improvement their update provides.',
         tags: ['Rewards', 'Blockchain'],
-        imageContent: <Activity className="w-12 h-12 text-emerald-400" />
+        imageContent: <Activity className="w-12 h-12 text-[#ffffff]" />
       },
     ],
     stats: [
@@ -62,8 +52,23 @@ export default function LandingPage() {
       { value: '0', label: 'Trust Required' },
       { value: '∞', label: 'Scalability' },
     ],
-    showAnimatedBackground: true,
+    showAnimatedBackground: false,
   };
 
-  return <PortfolioPage {...customPortfolioData} />;
+  return (
+    <>
+      <BackgroundAtoms />
+      <style dangerouslySetInnerHTML={{__html: `
+        #projects {
+          margin-top: 350px;
+        }
+        #about > div {
+          padding-top: 120px;
+        }
+      `}} />
+      <div className="relative z-10 w-full min-h-screen bg-transparent">
+        <PortfolioPage {...customPortfolioData} />
+      </div>
+    </>
+  );
 }

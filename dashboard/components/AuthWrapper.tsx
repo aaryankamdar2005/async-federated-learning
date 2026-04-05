@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, ShieldCheck } from "lucide-react";
 
 export interface User {
   username: string;
@@ -82,61 +82,79 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#020202] text-white flex items-center justify-center font-mono">
-        <div className="animate-pulse">LOADING AUTHENTICATION...</div>
+      <div className="min-h-screen bg-transparent text-[#E2E8F0] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[rgba(255,255,255,0.12)] border border-[rgba(255,255,255,0.2)] flex items-center justify-center glow-pulse">
+            <ShieldCheck className="w-6 h-6 text-[#ffffff]" />
+          </div>
+          <div className="text-[#64748B] text-sm animate-pulse">Authenticating...</div>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#020202] text-white flex items-center justify-center font-mono p-4">
-        <div className="max-w-md w-full bg-white/[0.02] border border-white/10 p-8 rounded-3xl">
+      <div className="min-h-screen bg-transparent text-[#E2E8F0] flex items-center justify-center p-4">
+        {/* Background glow effect */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[rgba(255,255,255,0.04)] blur-[120px]" />
+        </div>
+
+        <div className="relative max-w-md w-full glass-card p-8 rounded-2xl">
+          {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold tracking-tighter text-indigo-400 mb-2">ASYNC-SHIELD</h1>
-            <p className="text-gray-500 text-sm">AUTHENTICATION REQUIRED</p>
+            <div className="w-14 h-14 rounded-xl bg-[rgba(255,255,255,0.12)] border border-[rgba(255,255,255,0.2)] flex items-center justify-center mx-auto mb-4 glow-pulse">
+              <ShieldCheck className="w-7 h-7 text-[#ffffff]" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#E2E8F0] mb-1">
+              Async<span className="text-[#ffffff]">Shield</span>
+            </h1>
+            <p className="text-[#64748B] text-sm">
+              {authMode === 'login' ? 'Sign in to your account' : 'Create a new account'}
+            </p>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">USERNAME</label>
+              <label className="block text-xs text-[#64748B] mb-1.5 font-medium uppercase tracking-wider">Username</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full form-input rounded-xl px-4 py-3 text-sm"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">PASSWORD</label>
+              <label className="block text-xs text-[#64748B] mb-1.5 font-medium uppercase tracking-wider">Password</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full form-input rounded-xl px-4 py-3 text-sm"
                 required
               />
             </div>
 
             {authError && (
-              <div className={`text-xs p-3 rounded-lg ${authError.includes('successful') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+              <div className={`text-xs p-3 rounded-xl ${authError.includes('successful') ? 'badge-success' : 'badge-danger'}`}>
                 {authError}
               </div>
             )}
 
             <button 
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mt-6"
+              className="w-full primary-button py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mt-6 text-sm"
             >
-              {authMode === 'login' ? <><LogIn size={18}/> LOGIN</> : <><UserPlus size={18}/> REGISTER</>}
+              {authMode === 'login' ? <><LogIn size={18}/> Sign In</> : <><UserPlus size={18}/> Create Account</>}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <button 
               onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }}
-              className="text-xs text-gray-500 hover:text-indigo-400 transition-colors"
+              className="text-xs text-[#64748B] hover:text-[#ffffff] transition-colors"
             >
               {authMode === 'login' ? "Don't have an account? Register here." : "Already have an account? Login here."}
             </button>

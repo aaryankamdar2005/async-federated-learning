@@ -1,43 +1,34 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
-  --color-gray-50: #f9fafb;
-  --color-gray-200: #e5e7eb;
-  --color-gray-400: #9ca3af;
-  --color-gray-950: #030712;
+  --color-deep: #000000;
+  --color-surface: #0a0a0a;
+  --color-accent: #ffffff;
+  --color-accent-light: #e5e5e5;
+  --color-border-base: #27272a;
+  --color-border-hover: #3f3f46;
+  --color-text-primary: #ffffff;
+  --color-text-muted: #a1a1aa;
 }
 
 body {
-  background-color: #030712; /* Tailwind gray-950 */
-  color: #f9fafb; /* Tailwind gray-50 */
+  background-color: #000000;
+  color: #ffffff;
 }
 
 @layer components {
-  .bg-background { @apply bg-[#030712]; }
-  .text-foreground { @apply text-gray-50; }
-  .text-muted-foreground { @apply text-gray-400; }
-  .bg-border { @apply bg-white/5; }
-  .border-border { @apply border-white/10; }
-  .glass-button { @apply bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all; }
-  .primary-button { @apply bg-white text-black hover:bg-gray-200 transition-all; }
-  .glass-card { @apply bg-white/5 border border-white/10 backdrop-blur-lg; }
-  .project-image { @apply bg-black/50 overflow-hidden relative; }
-  .skill-badge { @apply bg-white/10 border border-white/10; }
-  .divider { @apply w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent; }
-  .gradient-text { @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-indigo-500; }
-  .geist-font { font-family: sans-serif; }
-  .inter-font { font-family: sans-serif; }
-}
+  .bg-background { background-color: #000000; }
+  .bg-surface    { background-color: #0a0a0a; }
+  .text-foreground       { color: #ffffff; }
+  .text-muted-foreground { color: #a1a1aa; }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+  .glass-card {
+    background: #0a0a0a;
+    border: 1px solid #27272a;
+    box-shadow: none;
+    transition: border-color 0.3s ease;
   }
-  50% {
-    transform: translateY(-10px);
+  .glass-card:hover {
+    border-color: #3f3f46;
   }
-}
-
-.float-animation {
-  animation: float 6s ease-in-out infinite;
 }

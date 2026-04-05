@@ -80,28 +80,26 @@ export default function CommitHistoryPanel({
 
   const getStatusColor = (status: string) => {
     if (isRejected(status))
-      return "bg-red-900/30 border-red-700/50 hover:bg-red-900/50";
+      return "bg-[rgba(239,68,68,0.06)] border-[rgba(239,68,68,0.15)] hover:border-[rgba(239,68,68,0.3)]";
     if (isMerged(status))
-      return "bg-green-900/30 border-green-700/50 hover:bg-green-900/50";
-    return "bg-white/5 border-white/10 hover:bg-white/10";
+      return "bg-[rgba(34,197,94,0.06)] border-[rgba(34,197,94,0.15)] hover:border-[rgba(34,197,94,0.3)]";
+    return "glass-card";
   };
 
   const getStatusBadgeColor = (status: string) => {
-    if (isRejected(status))
-      return "bg-red-900/50 text-red-300 border border-red-800";
-    if (isMerged(status))
-      return "bg-green-900/50 text-green-300 border border-green-800";
-    return "bg-blue-900/50 text-blue-300 border border-blue-800";
+    if (isRejected(status)) return "badge-danger";
+    if (isMerged(status)) return "badge-success";
+    return "badge-info";
   };
 
   return (
     <div className="w-full max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl md:text-4xl font-light text-foreground mb-2 geist-font tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#E2E8F0] mb-2 tracking-tight">
           {title}
         </h2>
-        <p className="text-muted-foreground text-sm inter-font">
+        <p className="text-[#64748B] text-sm">
           View recent model updates and contributions
         </p>
       </div>
@@ -110,15 +108,15 @@ export default function CommitHistoryPanel({
       {loading && (
         <div className="text-center py-12">
           <div className="inline-block">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-400"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#ffffff]"></div>
           </div>
-          <p className="text-muted-foreground mt-4 inter-font">Loading commit history...</p>
+          <p className="text-[#64748B] mt-4 text-sm">Loading commit history...</p>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-950/30 border border-red-700/50 rounded-lg p-4 text-red-300 inter-font text-sm">
+        <div className="badge-danger rounded-xl p-4 text-sm">
           {error}
         </div>
       )}
@@ -126,8 +124,8 @@ export default function CommitHistoryPanel({
       {/* Empty State */}
       {!loading && commits.length === 0 && !error && (
         <div className="text-center py-12">
-          <GitCommit className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <p className="text-muted-foreground inter-font">No commits yet</p>
+          <GitCommit className="h-12 w-12 text-[#64748B] mx-auto mb-4 opacity-50" />
+          <p className="text-[#64748B]">No commits yet</p>
         </div>
       )}
 
@@ -137,21 +135,20 @@ export default function CommitHistoryPanel({
           {commits.map((commit, index) => (
             <div
               key={`${commit.id}-${index}-${commit.author}`}
-              className={`rounded-xl border transition-all shadow-lg p-5 transform hover:scale-[1.02] ${getStatusColor(
+              className={`rounded-xl border transition-all duration-300 p-5 transform hover:scale-[1.01] ${getStatusColor(
                 commit.status
               )}`}
             >
-              {/* Timeline Connector */}
-              {index < commits.length - 1 && (
-                <div className="absolute left-[2.2rem] top-full w-0.5 h-4 bg-gradient-to-b from-white/20 to-transparent" />
-              )}
-
               <div className="flex gap-4">
                 {/* Avatar/Icon */}
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border border-white/10 shadow-lg">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    isRejected(commit.status)
+                      ? "bg-[rgba(239,68,68,0.1)] border-[rgba(239,68,68,0.2)]"
+                      : "bg-gradient-to-br from-[#ffffff] to-[#5b7fff] border-[rgba(255,255,255,0.3)]"
+                  }`}>
                     {isRejected(commit.status) ? (
-                      <AlertTriangle className="h-5 w-5 text-red-300" />
+                      <AlertTriangle className="h-5 w-5 text-[#f87171]" />
                     ) : (
                       <GitCommit className="h-5 w-5 text-white" />
                     )}
@@ -162,15 +159,13 @@ export default function CommitHistoryPanel({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex items-center gap-3 flex-wrap">
-                      {/* Author */}
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <span className="font-mono text-sm text-gray-300 font-medium">
+                        <User className="h-4 w-4 text-[#64748B] flex-shrink-0" />
+                        <span className="font-mono text-sm text-[#E2E8F0] font-medium">
                           {commit.author || "Anonymous"}
                         </span>
                       </div>
 
-                      {/* Status Badge */}
                       <span
                         className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadgeColor(
                           commit.status
@@ -180,36 +175,32 @@ export default function CommitHistoryPanel({
                       </span>
                     </div>
 
-                    {/* Timestamp */}
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                    <div className="flex items-center gap-1 text-xs text-[#64748B] flex-shrink-0">
                       <Clock className="h-3 w-3" />
                       {formatTime(commit.timestamp)}
                     </div>
                   </div>
 
-                  {/* Message */}
-                  <p className="text-sm text-gray-300 mb-3 inter-font leading-relaxed">
+                  <p className="text-sm text-[#94a3b8] mb-3 leading-relaxed">
                     {commit.message}
                   </p>
 
                   {/* Footer with Metrics */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-4 text-xs">
-                      {/* Version Change */}
                       {commit.version_bump && commit.version_bump !== "None" && (
-                        <div className="flex items-center gap-1 text-blue-300/70">
+                        <div className="flex items-center gap-1 text-[#5b7fff]/70">
                           <span>📦</span>
                           <span className="font-mono">{commit.version_bump}</span>
                         </div>
                       )}
 
-                      {/* Improvement */}
                       {commit.improvement !== 0 && (
                         <div
                           className={`flex items-center gap-1 ${
                             commit.improvement > 0
-                              ? "text-green-400/70"
-                              : "text-red-400/70"
+                              ? "text-[#4ade80]/70"
+                              : "text-[#f87171]/70"
                           }`}
                         >
                           <TrendingUp className="h-3 w-3" />
@@ -220,20 +211,18 @@ export default function CommitHistoryPanel({
                         </div>
                       )}
 
-                      {/* Verification Check */}
                       {isMerged(commit.status) && (
-                        <div className="flex items-center gap-1 text-green-400/70">
+                        <div className="flex items-center gap-1 text-[#4ade80]/70">
                           <CheckCircle2 className="h-3 w-3" />
                           <span>Verified</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Bounty Badge */}
                     {commit.bounty > 0 && (
-                      <div className="flex items-center gap-2 px-3 py-1 bg-yellow-900/20 border border-yellow-700/30 rounded-lg">
-                        <span className="text-yellow-400 font-bold text-sm">💰</span>
-                        <span className="text-yellow-300/80 font-mono text-xs font-medium">
+                      <div className="flex items-center gap-2 token-badge px-3 py-1 rounded-lg">
+                        <span className="font-bold text-sm">💰</span>
+                        <span className="font-mono text-xs font-medium">
                           +{commit.bounty} pts
                         </span>
                       </div>
@@ -248,25 +237,25 @@ export default function CommitHistoryPanel({
 
       {/* Summary Stats */}
       {!loading && commits.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-white/10">
+        <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.12)]">
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-light text-foreground geist-font">
+            <div className="text-center glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[#E2E8F0]">
                 {commits.length}
               </div>
-              <div className="text-xs text-muted-foreground inter-font mt-1">Total Commits</div>
+              <div className="text-xs text-[#64748B] mt-1">Total Commits</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-light text-green-400 geist-font">
+            <div className="text-center glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[#4ade80]">
                 {commits.filter((c) => isMerged(c.status)).length}
               </div>
-              <div className="text-xs text-muted-foreground inter-font mt-1">Merged</div>
+              <div className="text-xs text-[#64748B] mt-1">Merged</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-light text-yellow-400 geist-font">
+            <div className="text-center glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[#F59E0B]">
                 {commits.reduce((sum, c) => sum + c.bounty, 0)}
               </div>
-              <div className="text-xs text-muted-foreground inter-font mt-1">Total Bounty</div>
+              <div className="text-xs text-[#64748B] mt-1">Total Bounty</div>
             </div>
           </div>
         </div>

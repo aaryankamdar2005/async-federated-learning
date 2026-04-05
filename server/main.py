@@ -10,12 +10,12 @@ import uuid
 import os
 import torch
 import io
-import torch
+import zipfile
 import json
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from aggregator import RobustAggregator
 from database import AsyncDatabase
-from evaluator import Evaluator  
+from evaluator import Evaluator
 from models import RobustCNN, restore_1d_to_model
 
 app = FastAPI()
@@ -32,7 +32,7 @@ app.add_middleware(
 # Initialize Core Components
 db = AsyncDatabase("asyncshield.db")
 aggregator = RobustAggregator()
-evaluator = Evaluator() 
+evaluator = Evaluator()
 
 # Global Configuration
 MAX_WEIGHTS = 500000  # Size for RobustCNN vector
@@ -88,7 +88,7 @@ def get_repo_model(repo_id: str):
         "weights": repo_weights_store[repo_id].tolist()
     }
 
-# --- THE UNIFIED SUBMIT ENDPOINT (JSON File Upload) ---
+# --- THE UNIFIED SUBMIT ENDPOINT (Direct Application) ---
 
 @app.post("/repos/{repo_id}/submit_update")
 async def submit_repo_update(
@@ -103,25 +103,133 @@ async def submit_repo_update(
     if repo_id not in repo_weights_store:
         repo_weights_store[repo_id] = get_initial_weights(RobustCNN())
 
-    # 2. Read and Parse .pth Binary File
+    # 2. Read and Parse .pth or .zip File
+    pth_data = None
     try:
         contents = await file.read()
-        buffer = io.BytesIO(contents)
+        print(f"[DEBUG] File received: {file.filename}, Size: {len(contents)} bytes")
         
-        # Load the torch file (map to CPU to avoid GPU errors)
-        data = torch.load(buffer, map_location=torch.device('cpu'))
+        if not contents:
+            return {"status": "error", "message": "File is empty. Please upload a valid file."}
+        
+        filename_lower = file.filename.lower() if file.filename else ""
+        
+        if filename_lower.endswith('.zip'):
+            print(f"[DEBUG] Processing ZIP file: {file.filename}")
+            zip_buffer = io.BytesIO(contents)
+            
+            try:
+                with zipfile.ZipFile(zip_buffer, 'r') as zip_ref:
+                    pth_files = [f for f in zip_ref.namelist() if f.endswith('.pth')]
+                    print(f"[DEBUG] Files in ZIP: {zip_ref.namelist()}")
+                    print(f"[DEBUG] Found {len(pth_files)} .pth files")
+                    
+                    if not pth_files:
+                        return {"status": "error", "message": f"No .pth file found in ZIP. Files found: {', '.join(zip_ref.namelist())}"}
+                    
+                    pth_file_path = pth_files[0]
+                    print(f"[DEBUG] Extracting .pth file: {pth_file_path}")
+                    
+                    with zip_ref.open(pth_file_path) as pth_file:
+                        pth_contents = pth_file.read()
+                        print(f"[DEBUG] .pth file size: {len(pth_contents)} bytes")
+                        pth_buffer = io.BytesIO(pth_contents)
+                        pth_data = torch.load(pth_buffer, map_location=torch.device('cpu'))
+                        print(f"[DEBUG] Successfully loaded .pth from ZIP")
+                        
+            except zipfile.BadZipFile as ze:
+                print(f"[ERROR] Bad ZIP file: {ze}")
+                return {"status": "error", "message": f"Invalid ZIP file: {str(ze)}"}
+            except Exception as ze:
+                print(f"[ERROR] ZIP extraction error: {ze}")
+                return {"status": "error", "message": f"Failed to extract from ZIP: {str(ze)}"}
+                
+        elif filename_lower.endswith('.pth'):
+            print(f"[DEBUG] Processing direct .pth file: {file.filename}")
+            pth_buffer = io.BytesIO(contents)
+            try:
+                pth_data = torch.load(pth_buffer, map_location=torch.device('cpu'))
+                print(f"[DEBUG] Successfully loaded direct .pth file")
+            except Exception as pth_err:
+                print(f"[ERROR] Failed to load .pth: {pth_err}")
+                return {"status": "error", "message": f"Invalid .pth file: {str(pth_err)}"}
+        else:
+            print(f"[DEBUG] Unknown extension, attempting auto-detection: {file.filename}")
+            pth_buffer = io.BytesIO(contents)
+            
+            try:
+                pth_data = torch.load(pth_buffer, map_location=torch.device('cpu'))
+                print(f"[DEBUG] Auto-detected as .pth file")
+            except:
+                try:
+                    pth_buffer.seek(0)
+                    zip_buffer = io.BytesIO(contents)
+                    with zipfile.ZipFile(zip_buffer, 'r') as zip_ref:
+                        pth_files = [f for f in zip_ref.namelist() if f.endswith('.pth')]
+                        if pth_files:
+                            with zip_ref.open(pth_files[0]) as pth_file:
+                                pth_contents = pth_file.read()
+                                pth_buffer = io.BytesIO(pth_contents)
+                                pth_data = torch.load(pth_buffer, map_location=torch.device('cpu'))
+                                print(f"[DEBUG] Auto-detected as ZIP file")
+                        else:
+                            return {"status": "error", "message": "File format not recognized. Please upload a .pth file or .zip containing a .pth file."}
+                except Exception as auto_err:
+                    print(f"[ERROR] Auto-detection failed: {auto_err}")
+                    return {"status": "error", "message": f"Cannot process file. Must be .pth or .zip. Error: {str(auto_err)[:100]}"}
+        
+        if pth_data is None:
+            return {"status": "error", "message": "Failed to load file data. Please ensure your file is valid."}
         
         # Extract the delta (handles both raw tensor or dictionary format)
-        if isinstance(data, dict) and "weights_delta" in data:
-            delta = data["weights_delta"].numpy()
-        else:
-            delta = data.numpy() if hasattr(data, 'numpy') else np.array(data)
+        try:
+            if isinstance(pth_data, dict) and "weights_delta" in pth_data:
+                delta = pth_data["weights_delta"].numpy()
+                print(f"[DEBUG] Extracted weights_delta from dict")
+            elif isinstance(pth_data, dict):
+                print(f"[DEBUG] No 'weights_delta' found, assuming state_dict. Standardizing...")
+                raw_weights = []
+                for key in sorted(pth_data.keys()):
+                    val = pth_data[key]
+                    if hasattr(val, 'cpu'):
+                        raw_weights.append(val.cpu().numpy().flatten())
+                    elif hasattr(val, 'numpy'):
+                        raw_weights.append(val.numpy().flatten())
+                    else:
+                        raw_weights.append(np.array(val).flatten())
+                
+                flat_1d = np.concatenate(raw_weights) if raw_weights else np.array([])
+                
+                if len(flat_1d) < MAX_WEIGHTS:
+                    flat_1d = np.concatenate([flat_1d, np.zeros(MAX_WEIGHTS - len(flat_1d))])
+                else:
+                    flat_1d = flat_1d[:MAX_WEIGHTS]
+                
+                global_w = repo_weights_store.get(repo_id, np.zeros(MAX_WEIGHTS))
+                delta = flat_1d - global_w
+                print(f"[DEBUG] Computed delta automatically from full state_dict")
 
-        print(f"[DEBUG] Loaded binary weights. Size: {len(delta)}")
+            else:
+                delta = pth_data.numpy() if hasattr(pth_data, 'numpy') else np.array(pth_data)
+
+            if len(delta.shape) > 1:
+                delta = delta.flatten()
+            
+            if len(delta) < MAX_WEIGHTS:
+                delta = np.concatenate([delta, np.zeros(MAX_WEIGHTS - len(delta))])
+            elif len(delta) > MAX_WEIGHTS:
+                delta = delta[:MAX_WEIGHTS]
+
+            print(f"[DEBUG] Loaded binary weights. Size: {len(delta)}")
+        except Exception as ext_err:
+            print(f"[ERROR] Failed to extract weights: {ext_err}")
+            return {"status": "error", "message": f"Failed to extract weights from file: {str(ext_err)}"}
         
     except Exception as e:
-        print(f"[ERROR] .pth Parse Failed: {e}")
-        return {"status": "error", "message": "The file is not a valid .pth PyTorch file."}
+        print(f"[ERROR] File Parse Failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": f"File processing failed: {str(e)[:150]}"}
 
     # 3. Validate Dimensions
     if len(delta) != MAX_WEIGHTS:
@@ -183,6 +291,7 @@ def get_dashboard_data():
 @app.get("/download_architecture")
 def download_architecture():
     return FileResponse("models.py", media_type="text/x-python", filename="models.py")
+
 
 import subprocess
 import shutil

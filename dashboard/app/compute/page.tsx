@@ -36,7 +36,6 @@ class SimpleCNN(nn.Module):
         return torch.log_softmax(x, dim=1)
 
 # 2. Load your dataset from ./data
-# (Assuming the uploaded zip contains MNIST data)
 print("Loading dataset...")
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 train_set = datasets.MNIST('./data', train=True, download=True, transform=transform)
@@ -107,43 +106,49 @@ print("Done!")
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex justify-between items-start">
+    <div className="min-h-screen bg-transparent text-[#E2E8F0] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">Cloud Compute Simulator</h1>
-            <p className="text-muted-foreground">Write your training code, upload your dataset, and get the trained weights (.pth) back.</p>
-            <p className="text-xs text-gray-500 mt-2 font-mono">LOGGED IN AS: <span className="text-white">{user.username}</span></p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.12)] border border-[rgba(255,255,255,0.2)] flex items-center justify-center">
+                <Terminal className="w-5 h-5 text-[#ffffff]" />
+              </div>
+              Cloud Compute
+            </h1>
+            <p className="text-[#64748B] text-sm">Write your training code, upload your dataset, and get the trained weights (.pth) back.</p>
+            <p className="text-xs text-[#64748B] mt-2">Logged in as <span className="text-[#E2E8F0] font-semibold">{user.username}</span></p>
           </div>
-          <div className="flex items-center gap-4 font-mono">
-            <div className="bg-yellow-500/10 border border-yellow-500/20 px-6 py-2 rounded-full text-yellow-500 font-bold flex gap-2 items-center">
-              <Coins size={18}/> Balance: <span>{user.tokens} TOKENS</span>
+          <div className="flex items-center gap-3">
+            <div className="token-badge px-5 py-2 rounded-xl font-bold flex gap-2 items-center text-sm">
+              <Coins size={16}/> {user.tokens} TOKENS
             </div>
-            <button onClick={logout} className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Logout">
-              <LogOut size={20} />
+            <button onClick={logout} className="p-2.5 rounded-xl text-[#64748B] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] transition-all" title="Logout">
+              <LogOut size={18} />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column: Code & Dataset */}
           <div className="space-y-6">
-            <div className="glass-card p-6 rounded-2xl border border-border">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Terminal className="w-5 h-5 text-blue-400" />
+            <div className="glass-card p-6 rounded-2xl">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-[#ffffff]" />
                 Training Script (Python)
               </h2>
               <textarea
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full h-[400px] bg-black/50 text-green-400 font-mono text-sm p-4 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                className="w-full h-[400px] bg-[rgba(6,9,26,0.8)] text-[#4ade80] font-mono text-sm p-4 rounded-xl border border-[rgba(255,255,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[rgba(255,255,255,0.3)] focus:border-[rgba(255,255,255,0.3)] resize-none transition-all"
                 spellCheck="false"
               />
             </div>
 
-            <div className="glass-card p-6 rounded-2xl border border-border">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Upload className="w-5 h-5 text-purple-400" />
+            <div className="glass-card p-6 rounded-2xl">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Upload className="w-5 h-5 text-[#5b7fff]" />
                 Dataset Upload (.zip)
               </h2>
               <div className="flex items-center gap-4">
@@ -151,32 +156,32 @@ print("Done!")
                   type="file"
                   accept=".zip"
                   onChange={(e) => setDataset(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-muted-foreground
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
+                  className="block w-full text-sm text-[#64748B]
+                    file:mr-4 file:py-2.5 file:px-5
+                    file:rounded-xl file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-blue-500/10 file:text-blue-400
-                    hover:file:bg-blue-500/20 transition-colors"
+                    file:bg-[rgba(255,255,255,0.1)] file:text-[#5b7fff]
+                    hover:file:bg-[rgba(255,255,255,0.2)] file:transition-colors file:cursor-pointer"
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                The zip file will be extracted to the <code>./data</code> directory in your script's environment.
+              <p className="text-xs text-[#64748B] mt-3">
+                The zip file will be extracted to the <code className="text-[#ffffff] bg-[rgba(255,255,255,0.08)] px-1.5 py-0.5 rounded">./data</code> directory in your script&apos;s environment.
               </p>
             </div>
 
             <button
               onClick={handleRun}
               disabled={isExecuting}
-              className="w-full primary-button py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full primary-button py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isExecuting ? (
                 <>
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Executing on Cloud...
                 </>
               ) : (
                 <>
-                  <Play className="w-6 h-6" />
+                  <Play className="w-5 h-5" />
                   Run Compute Job
                 </>
               )}
@@ -185,30 +190,30 @@ print("Done!")
 
           {/* Right Column: Logs & Output */}
           <div className="space-y-6">
-            <div className="glass-card p-6 rounded-2xl border border-border h-full flex flex-col">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Terminal className="w-5 h-5 text-gray-400" />
+            <div className="glass-card p-6 rounded-2xl h-full flex flex-col">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-[#64748B]" />
                 Execution Logs
               </h2>
               
               {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl mb-4 text-sm">
+                <div className="badge-danger p-4 rounded-xl mb-4 text-sm">
                   {error}
                 </div>
               )}
 
-              <div className="flex-1 bg-black/50 rounded-xl border border-border p-4 overflow-y-auto font-mono text-xs text-gray-300 whitespace-pre-wrap min-h-[300px]">
+              <div className="flex-1 bg-[rgba(6,9,26,0.8)] rounded-xl border border-[rgba(255,255,255,0.08)] p-4 overflow-y-auto font-mono text-xs text-[#94a3b8] whitespace-pre-wrap min-h-[300px]">
                 {logs || "Waiting for execution..."}
               </div>
 
               {runId && (
-                <div className="mt-6 pt-6 border-t border-border">
-                  <h3 className="text-lg font-medium mb-2 text-green-400">Job Completed Successfully!</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Your model weights have been saved and are ready for download.</p>
+                <div className="mt-6 pt-6 border-t border-[rgba(255,255,255,0.12)]">
+                  <h3 className="text-lg font-medium mb-2 text-[#4ade80]">Job Completed Successfully!</h3>
+                  <p className="text-sm text-[#64748B] mb-4">Your model weights have been saved and are ready for download.</p>
                   <a
                     href={`http://localhost:8000/compute/download/${runId}`}
                     download
-                    className="inline-flex items-center gap-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/50 px-6 py-3 rounded-xl font-medium transition-colors"
+                    className="inline-flex items-center gap-2 badge-success px-6 py-3 rounded-xl font-medium transition-colors hover:bg-[rgba(34,197,94,0.15)] text-sm"
                   >
                     <Download className="w-5 h-5" />
                     Download output.pth

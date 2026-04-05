@@ -14,50 +14,48 @@ export default function CommitCard({ commit }: { commit: CommitProps }) {
 
   return (
     <div
-      className={`p-4 rounded-xl border transition-all shadow-lg ${
+      className={`p-4 rounded-xl border transition-all duration-300 ${
         isRejected
-          ? "bg-red-950/20 border-red-900/50 hover:bg-red-950/40"
-          : "bg-white/5 border-white/10 hover:bg-white/10"
+          ? "bg-[rgba(239,68,68,0.06)] border-[rgba(239,68,68,0.15)] hover:border-[rgba(239,68,68,0.3)]"
+          : "glass-card"
       }`}
     >
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            {/* Dynamic Icon */}
             {isRejected ? (
-              <AlertTriangle className="text-red-500 h-5 w-5" />
+              <div className="w-8 h-8 rounded-lg bg-[rgba(239,68,68,0.1)] flex items-center justify-center">
+                <AlertTriangle className="text-[#EF4444] h-4 w-4" />
+              </div>
             ) : (
-              <GitCommit className="text-indigo-400 h-5 w-5" />
+              <div className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.1)] flex items-center justify-center">
+                <GitCommit className="text-[#ffffff] h-4 w-4" />
+              </div>
             )}
             
-            <span className="font-mono text-gray-300 text-sm">{commit.client}</span>
+            <span className="font-mono text-[#E2E8F0] text-sm">{commit.client}</span>
             
-            {/* Status Badge */}
             <span
               className={`text-xs px-2 py-1 rounded-full font-medium ${
-                isRejected 
-                  ? "bg-red-900/50 text-red-300 border border-red-800" 
-                  : "bg-green-900/50 text-green-300 border border-green-800"
+                isRejected ? "badge-danger" : "badge-success"
               }`}
             >
               {commit.status}
             </span>
           </div>
           
-          {/* Commit Message / Reason */}
-          <p className="text-gray-400 text-sm mt-3 ml-8 flex items-center gap-2">
+          <p className="text-[#64748B] text-sm mt-3 ml-11 flex items-center gap-2">
             {isRejected ? commit.reason : `Successfully merged: ${commit.version_bump}`}
-            {!isRejected && <CheckCircle2 className="h-4 w-4 text-green-500/70" />}
+            {!isRejected && <CheckCircle2 className="h-4 w-4 text-[#22C55E]/70" />}
           </p>
         </div>
 
-        {/* Bounty Reward */}
         {commit.bounty > 0 && (
           <div className="text-right flex flex-col items-end">
-            <div className="text-yellow-400 font-bold text-sm bg-yellow-900/20 px-3 py-1 rounded-md border border-yellow-700/30">
+            <div className="token-badge font-bold text-sm px-3 py-1 rounded-lg">
               +{commit.bounty} 🪙
             </div>
-            <span className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Bounty Earned</span>
+            <span className="text-[10px] text-[#64748B] mt-1 uppercase tracking-wider">Bounty Earned</span>
           </div>
         )}
       </div>
